@@ -1,0 +1,23 @@
+{
+    "breakpoints": [
+        {
+            "breakpoint_type": 0,
+            "condition": "",
+            "enabled": true,
+            "filename": "StudentSystem.c",
+            "line": 184,
+            "timestamp": "1705200796128"
+        },
+        {
+            "breakpoint_type": 0,
+            "condition": "",
+            "enabled": true,
+            "filename": "StudentSystem.h",
+            "line": 25,
+            "timestamp": "1705426383941"
+        }
+    ],
+    "timestamp": "1705490260807",
+    "watchvars": [
+    ]
+}

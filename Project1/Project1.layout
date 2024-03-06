@@ -1,0 +1,22 @@
+[
+    {
+        "caretX": 19,
+        "caretY": 103,
+        "filename": "C:/Users/bb/Desktop/2023届学生管理系统/系统项目/Project1/StudentSystem.c",
+        "focused": true,
+        "isOpen": true,
+        "leftChar": 1,
+        "order": 1,
+        "topLine": 91
+    },
+    {
+        "caretX": 112,
+        "caretY": 42,
+        "filename": "C:/Users/bb/Desktop/2023届学生管理系统/系统项目/Project1/StudentSystem.h",
+        "focused": false,
+        "isOpen": true,
+        "leftChar": 34,
+        "order": 0,
+        "topLine": 37
+    }
+]

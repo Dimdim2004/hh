@@ -1,0 +1,35 @@
+# Project: Project1
+# Makefile created by Red Panda C++ 2.25.1
+
+CPP      = g++.exe
+CC       = gcc.exe
+WINDRES  = windres.exe
+RES      = Project1_private.res
+OBJ      = StudentSystem.o $(RES)
+LINKOBJ  = StudentSystem.o Project1_private.res
+CLEANOBJ  =  StudentSystem.o  Project1_private.res Project1.exe
+LIBS     = 
+INCS     =  
+CXXINCS  =  
+BIN      = Project1.exe
+CXXFLAGS = $(CXXINCS)  -g3 -pipe -Wall -D__DEBUG__
+CFLAGS   = $(INCS)  -g3 -pipe -Wall -D__DEBUG__
+RM       = del /q /f
+WINDRESFLAGS  = 
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	-$(RM) $(CLEANOBJ) > NUL 2>&1
+
+$(BIN): $(OBJ)
+	$(CC) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+StudentSystem.o: StudentSystem.c StudentSystem.h
+	$(CC) -c StudentSystem.c -o StudentSystem.o $(CFLAGS)  -finput-charset=UTF-8 -fexec-charset=gbk
+
+Project1_private.res: Project1_private.rc 
+	$(WINDRES) -i Project1_private.rc --input-format=rc -o Project1_private.res -O coff $(WINDRESFLAGS) 
+
