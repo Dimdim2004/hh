@@ -642,6 +642,51 @@ void TeacherMenu(Tea* teacher) {
 	} while (1);
 }
 
+void ViewTodoList() {
+	FILE *file = fopen("代办事项.txt", "r");
+	if (file == NULL) {
+		printf("无法打开文件。\n");
+		return;
+	}
+	
+	char line[MAX_LENGTH];
+	while (fgets(line, sizeof(line), file) != NULL) {
+		printf("%s",line);
+		char name[MAX_LENGTH], idnumber[MAX_LENGTH];
+		if (sscanf(line, "申请者：%s ID：%s", name, idnumber) == 2) {
+			printf("姓名：%s\n", name);
+			printf("学号：%s\n", idnumber);
+			Stu *student = FindStudentInfo(name, idnumber);
+			if (student != NULL) {
+				printf("班级：%s\n", student->className);
+				printf("语文成绩：%d 数学成绩：%d 英语成绩：%d\n\n", student->grade[0],student->grade[1],student->grade[2]);
+				
+				// 打印菜单供教师选择
+				int choice;
+				do {
+					PrintMenu();
+					scanf("%d", &choice);
+					getchar(); // 消耗换行符
+					
+					switch (choice) {
+					case 1:
+						SubmitToAdmin(student);
+						break;
+					case 2:
+						RejectAppeal();
+						break;
+					default:
+						printf("无效选项，请重新选择。\n");
+						break;
+					}
+				} while (choice != 1 && choice != 2);
+				free(student);
+			}
+		}
+	}
+	fclose(file);
+}
+
 void CheckStudentInformation(Classes* classPtr){
 	char key[MAX_LENGTH];
 	printf("请输入需要查询学生的名字或者ID:");
