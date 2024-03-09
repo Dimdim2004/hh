@@ -579,7 +579,7 @@ void TeacherMenu(Tea* teacher) {
 		printf("*****************  5、展示本班成绩  *****************\n");
 		printf("*****************  6、导出本班成绩  *****************\n");
 		printf("*****************  7、本班成绩分析  *****************\n");
-		printf("*****************  8、提醒成绩更新  *****************\n");
+		printf("*****************  8、查看代办函数  *****************\n");
 		printf("*****************  9、返回上一层    *****************\n");
 		printf("*****************  0、退出该系统    *****************\n");
 		printf("*****************************************************\n");
@@ -620,6 +620,7 @@ void TeacherMenu(Tea* teacher) {
 				AnalyzeClass(current); // 本班成绩分析函数
 				break;
 			case '8':
+				ViewTodoList();
 				// 提醒成绩更新函数
 				break;
 			case '9':
@@ -642,8 +643,9 @@ void TeacherMenu(Tea* teacher) {
 	} while (1);
 }
 
+
 void ViewTodoList() {
-	FILE *file = fopen("代办事项.txt", "r");
+	FILE *file = fopen("代办事项教师端.txt", "r");
 	if (file == NULL) {
 		printf("无法打开文件。\n");
 		return;
@@ -651,11 +653,12 @@ void ViewTodoList() {
 	
 	char line[MAX_LENGTH];
 	while (fgets(line, sizeof(line), file) != NULL) {
+		printf("*****************************************************\n");
 		printf("%s",line);
+		printf("*****************************************************\n");
 		char name[MAX_LENGTH], idnumber[MAX_LENGTH];
 		if (sscanf(line, "申请者：%s ID：%s", name, idnumber) == 2) {
-			printf("姓名：%s\n", name);
-			printf("学号：%s\n", idnumber);
+
 			Stu *student = FindStudentInfo(name, idnumber);
 			if (student != NULL) {
 				printf("班级：%s\n", student->className);
@@ -664,7 +667,10 @@ void ViewTodoList() {
 				// 打印菜单供教师选择
 				int choice;
 				do {
-					PrintMenu();
+					printf("*****************************************************\n");
+					printf("*****************  1、提交给管理员  *****************\n");
+					printf("*****************  2、驳回该申诉    *****************\n");
+					printf("*****************************************************\n");
 					scanf("%d", &choice);
 					getchar(); // 消耗换行符
 					
@@ -685,6 +691,18 @@ void ViewTodoList() {
 		}
 	}
 	fclose(file);
+}
+
+void RejectAppeal(){
+	
+}
+
+void SubmitToAdmin(Stu* student){
+	FILE *file = fopen("代办事项管理员端.txt", "r");
+	if (file == NULL) {
+		printf("无法打开文件。\n");
+		return;
+	}
 }
 
 void CheckStudentInformation(Classes* classPtr){

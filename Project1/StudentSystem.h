@@ -92,4 +92,6 @@ void ExportAllStudentsToFile(Classes* headList, const char* filename);//更新st
 void InitializeTodoList(const Stu *student);//申诉成绩
 void PasswordRecovery();//找回密码
 Stu* FindStudentInfo(const char* name, const char* id);
-
+void SubmitToAdmin(Stu* student);
+void ViewTodoList();
+void RejectAppeal();
