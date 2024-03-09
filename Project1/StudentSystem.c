@@ -264,7 +264,7 @@ void StudentMenu(Stu* student) {
 
 
 void InitializeTodoList(const Stu *student) {
-	FILE *file = fopen("代办事项.txt", "a");
+	FILE *file = fopen("代办事项教师端.txt", "a");
 	if (file == NULL) {
 		printf("无法打开文件。\n");
 		return;
@@ -650,16 +650,17 @@ void ViewTodoList() {
 		printf("无法打开文件。\n");
 		return;
 	}
-	
-	char line[MAX_LENGTH];
+	system("cls");
+	char line[500];
 	while (fgets(line, sizeof(line), file) != NULL) {
-		printf("*****************************************************\n");
+		printf("-----------------------------------------------------------\n");
 		printf("%s",line);
-		printf("*****************************************************\n");
-		char name[MAX_LENGTH], idnumber[MAX_LENGTH];
-		if (sscanf(line, "申请者：%s ID：%s", name, idnumber) == 2) {
-
+		printf("-----------------------------------------------------------\n");
+		char name[MAX_LENGTH], idnumber[MAX_LENGTH], reason[128];
+		if (sscanf(line, "申请者：%s ID：%s 申请原因：%[^\n]", name, idnumber, reason)) {
+			printf("%s %s %s",name,idnumber,reason);
 			Stu *student = FindStudentInfo(name, idnumber);
+
 			if (student != NULL) {
 				printf("班级：%s\n", student->className);
 				printf("语文成绩：%d 数学成绩：%d 英语成绩：%d\n\n", student->grade[0],student->grade[1],student->grade[2]);
@@ -687,6 +688,8 @@ void ViewTodoList() {
 					}
 				} while (choice != 1 && choice != 2);
 				free(student);
+			}else {
+				printf("无法解析该行：%s\n", line);
 			}
 		}
 	}
