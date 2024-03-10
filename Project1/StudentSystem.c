@@ -302,8 +302,6 @@ bool CheckRejectedAppeals(const char *studentName) {
 	return found;
 }
 
-
-
 bool CheckStudentExistence(Stu *student) {
 
 	FILE *file = fopen("代办事项教师端.txt", "r");
@@ -325,7 +323,6 @@ bool CheckStudentExistence(Stu *student) {
 	fclose(file);
 	return false;
 }
-
 
 void InitializeTodoList(Stu *student) {
 	if (CheckRejectedAppeals(student->name)) {
@@ -751,13 +748,13 @@ void TeacherMenu(Tea* teacher) {
 void DeleteTodoItem(const char *filename, const char *lineToDelete) {
 	FILE *file = fopen(filename, "r");
 	if (file == NULL) {
-		printf("无法打开文件。\n");
+		printf("无法打开文件：%s\n", filename);
 		return;
 	}
 	
 	FILE *tempFile = fopen("temp.txt", "w");
 	if (tempFile == NULL) {
-		printf("无法打开临时文件。\n");
+		printf("无法打开临时文件：temp.txt\n");
 		fclose(file);
 		return;
 	}
@@ -772,8 +769,17 @@ void DeleteTodoItem(const char *filename, const char *lineToDelete) {
 	fclose(file);
 	fclose(tempFile);
 	
-	remove(filename);
-	rename("temp.txt", filename);
+	if (remove(filename) != 0) {
+		printf("原始文件删除失败：%s\n", filename);
+		return;
+	}
+	
+	if (rename("temp.txt", filename) != 0) {
+		printf("临时文件重命名失败：temp.txt -> %s\n", filename);
+		return;
+	}
+	
+	printf("删除并重命名操作成功。\n");
 }
 
 void ViewTodoList() {
@@ -782,9 +788,11 @@ void ViewTodoList() {
 		printf("无法打开文件。\n");
 		return;
 	}
-	system("cls");
+
 	char line[500];
 	while (fgets(line, sizeof(line), file) != NULL) {
+		Sleep(2000);
+		system("cls");
 		printf("-----------------------------------------------------------\n");
 		printf("%s", line);
 		printf("-----------------------------------------------------------\n");
@@ -799,7 +807,7 @@ void ViewTodoList() {
 			if (student != NULL) {
 				printf("班级：%s\n", student->className);
 				printf("语文成绩：%d 数学成绩：%d 英语成绩：%d\n\n", student->grade[0],student->grade[1],student->grade[2]);
-				
+
 				// 打印菜单供教师选择
 				int choice;
 				do {
@@ -808,11 +816,10 @@ void ViewTodoList() {
 					printf("*****************  2、驳回该申诉    *****************\n");
 					printf("*****************************************************\n");
 					scanf("%d", &choice);
-					getchar(); // 消耗换行符
 					
 					switch (choice) {
 					case 1:
-						SubmitToAdmin(student);
+						SubmitToAdmin(student, line);
 						DeleteTodoItem("代办事项教师端.txt", line);
 						break;
 					case 2:
@@ -847,12 +854,16 @@ void RejectAndRecordAppeal(Stu* student) {
 	fclose(file);
 }
 
-void SubmitToAdmin(Stu* student){
-	FILE *file = fopen("代办事项管理员端.txt", "r");
+void SubmitToAdmin(Stu *student, const char *todoItem) {
+	FILE *file = fopen("待办事项管理员端.txt", "a");
 	if (file == NULL) {
 		printf("无法打开文件。\n");
 		return;
 	}
+	
+	fprintf(file, "%s\n", todoItem);
+	
+	fclose(file);
 }
 
 void CheckStudentInformation(Classes* classPtr){
@@ -1243,7 +1254,7 @@ void AdminMenu(Admin* admin) {
 		ClearBuffer();
 		switch (choice) {
 			case 1:
-				
+				ViewTodoListAdmin();
 				// 查看代办事项函数
 				break;
 			case 2:
@@ -1288,6 +1299,120 @@ void AdminMenu(Admin* admin) {
 		printf("\n按下任意键继续操作...\n");
 		getchar(); // 等待用户按下任意键
 	} while (1);
+}
+
+void ModifyStudentInfo(Stu* student, const char* classFolder, const char* studentFolder) {
+	int newGrades[3];
+	
+	// 显示学生当前信息
+	printf("学生信息如下：\n");
+	printf("姓名：%s\n", student->name);
+	printf("学号：%s\n", student->acc.idnumber);
+	printf("密码：%s\n", student->acc.password);
+	printf("班级：%s\n", student->className);
+	printf("语文成绩：%d\n", student->grade[0]);
+	printf("数学成绩：%d\n", student->grade[1]);
+	printf("英语成绩：%d\n", student->grade[2]);
+	printf("\n");
+	
+	do {
+		printf("请输入修改后的语文成绩：");
+		newGrades[0] = safeInputInt();
+		if (newGrades[0] > 100) {
+			printf("错误：成绩不能超过100分，请重新输入。\n");
+		}
+	} while (newGrades[0] > 100);
+	
+	do {
+		printf("请输入修改后的数学成绩：");
+		newGrades[1] = safeInputInt();
+		if (newGrades[1] > 100) {
+			printf("错误：成绩不能超过100分，请重新输入。\n");
+		}
+	} while (newGrades[1] > 100);
+	
+	do {
+		printf("请输入修改后的英语成绩：");
+		newGrades[2] = safeInputInt();
+		if (newGrades[2] > 100) {
+			printf("错误：成绩不能超过100分，请重新输入。\n");
+		}
+	} while (newGrades[2] > 100);
+	
+	// 更新学生成绩
+	for (int i = 0; i < 3; ++i) {
+		student->grade[i] = newGrades[i];
+	}
+	char studentFilePath[256];
+	snprintf(studentFilePath, sizeof(studentFilePath), "%s\\students.txt", studentFolder);
+	UpdateStudentInfoInFile(studentFilePath, student, 0);
+	
+	
+	// 更新班级文件中的学生密码
+	char classFilePath[256];
+	snprintf(classFilePath, sizeof(classFilePath), "%s\\%s.txt", classFolder, student->className);
+	UpdateStudentInfoInFile(classFilePath, student, 1);
+	
+	printf("学生信息已成功修改！\n");
+	
+}
+
+
+void ViewTodoListAdmin() {
+	FILE *file = fopen("代办事项管理员端.txt", "r");
+	if (file == NULL) {
+		printf("无法打开文件。\n");
+		return;
+	}
+	system("cls");
+	char line[500];
+	while (fgets(line, sizeof(line), file) != NULL) {
+		printf("-----------------------------------------------------------\n");
+		printf("%s", line);
+		printf("-----------------------------------------------------------\n");
+		char name[MAX_LENGTH], idnumber[MAX_LENGTH], reason[256];
+		if (sscanf(line, "申请者：%s ID：%s %s", name, idnumber, reason)==3) {
+			// 申请者姓名为name，ID为idnumber，申请原因为reason
+			printf("申请者姓名：%s\n", name);
+			printf("申请者ID：%s\n", idnumber);
+			printf("%s\n", reason);
+			Stu *student = FindStudentInfo(name, idnumber);
+			
+			if (student != NULL) {
+				printf("班级：%s\n", student->className);
+				printf("语文成绩：%d 数学成绩：%d 英语成绩：%d\n\n", student->grade[0],student->grade[1],student->grade[2]);
+				Classes* current = FindClassByName(headList,student->className);
+				// 打印菜单供管理员选择
+				int choice;
+				do {
+					printf("*****************************************************\n");
+					printf("*****************  1、进行学生修改  *****************\n");
+					printf("*****************  2、驳回该申诉    *****************\n");
+					printf("*****************************************************\n");
+					scanf("%d", &choice);
+					getchar(); // 消耗换行符
+					
+					switch (choice) {
+					case 1:
+						ModifyStudentInfo(current, "C:\\Users\\bb\\Desktop\\2023届学生管理系统\\系统项目\\学生信息", "C:\\Users\\bb\\Desktop\\2023届学生管理系统\\系统项目");
+						DeleteTodoItem("代办事项管理员端.txt", line);
+						break;
+					case 2:
+						RejectAndRecordAppeal(student);
+						DeleteTodoItem("代办事项管理员端.txt", line);
+						break;
+					default:
+						printf("无效选项，请重新选择。\n");
+						break;
+					}
+				} while (choice != 1 && choice != 2);
+				free(student);
+			}else {
+				printf("无法解析该行：%s\n", line);
+			}
+		}
+	}
+	fclose(file);
 }
 
 void DeleteStudentImformationMenu(Admin* admin) {

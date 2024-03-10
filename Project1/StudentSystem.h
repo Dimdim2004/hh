@@ -91,8 +91,11 @@ void ExportAllStudentsToFile(Classes* headList, const char* filename);//更新st
 void InitializeTodoList(Stu *student);//申诉成绩
 void PasswordRecovery();//找回密码
 Stu* FindStudentInfo(const char* name, const char* id);
-void SubmitToAdmin(Stu* student);
-void ViewTodoList();
-void RejectAndRecordAppeal(Stu* student);
+void SubmitToAdmin(Stu *student, const char *todoItem);//将申诉信息写到管理员端
+void ViewTodoList();//查看代办
+void RejectAndRecordAppeal(Stu* student);//驳回申诉
 bool CheckStudentExistence(Stu* student);
-bool CheckRejectedAppeals(const char *studentName);
+bool CheckRejectedAppeals(const char *studentName);//查看驳回申诉的记录
+void DeleteTodoItem(const char *filename, const char *lineToDelete);//处理后对待办事项进行删除
+void ModifyStudentInfo(Stu* student, const char* classFolder, const char* studentFolder);//直接更改学生信息
+void ViewTodoListAdmin();//管理员端的查看代办
