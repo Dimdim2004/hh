@@ -262,7 +262,50 @@ void StudentMenu(Stu* student) {
 	} while (1);
 }
 
+// 在初始化代办事项列表时检查是否存在驳回的申诉
+bool CheckRejectedAppeals(const char *studentName) {
+	FILE *file = fopen("驳回申诉.txt", "r");
+	if (file == NULL) {
+		printf("无法打开文件。\n");
+		return false;
+	}
+	
+	FILE *tempFile = fopen("temp.txt", "w");
+	if (tempFile == NULL) {
+		printf("无法打开临时文件。\n");
+		fclose(file);
+		return false;
+	}
+	
+	char line[500];
+	bool found = false;
+	while (fgets(line, sizeof(line), file) != NULL) {
+		char name[MAX_LENGTH], id[MAX_LENGTH];
+		if (sscanf(line, "申请被驳回的学生：%s ID：%s", name, id) == 2) {
+			if (strcmp(name, studentName) == 0) {
+				found = true;
+			} else {
+				fputs(line, tempFile);
+			}
+		} else {
+			fputs(line, tempFile);
+		}
+	}
+	
+	fclose(file);
+	fclose(tempFile);
+	
+	// 删除原文件并将临时文件重命名为原文件
+	remove("驳回申诉.txt");
+	rename("temp.txt", "驳回申诉.txt");
+	
+	return found;
+}
+
+
+
 bool CheckStudentExistence(Stu *student) {
+
 	FILE *file = fopen("代办事项教师端.txt", "r");
 	if (file == NULL) {
 		printf("无法打开文件。\n");
@@ -285,6 +328,10 @@ bool CheckStudentExistence(Stu *student) {
 
 
 void InitializeTodoList(Stu *student) {
+	if (CheckRejectedAppeals(student->name)) {
+		printf("您的申诉已被驳回。\n");
+		return;
+	}
 	if (CheckStudentExistence(student)) {
 		printf("您的申诉正在审核中，请耐心等待。\n");
 		return;
@@ -701,6 +748,33 @@ void TeacherMenu(Tea* teacher) {
 	} while (1);
 }
 
+void DeleteTodoItem(const char *filename, const char *lineToDelete) {
+	FILE *file = fopen(filename, "r");
+	if (file == NULL) {
+		printf("无法打开文件。\n");
+		return;
+	}
+	
+	FILE *tempFile = fopen("temp.txt", "w");
+	if (tempFile == NULL) {
+		printf("无法打开临时文件。\n");
+		fclose(file);
+		return;
+	}
+	
+	char line[500];
+	while (fgets(line, sizeof(line), file) != NULL) {
+		if (strcmp(line, lineToDelete) != 0) {
+			fputs(line, tempFile);
+		}
+	}
+	
+	fclose(file);
+	fclose(tempFile);
+	
+	remove(filename);
+	rename("temp.txt", filename);
+}
 
 void ViewTodoList() {
 	FILE *file = fopen("代办事项教师端.txt", "r");
@@ -739,9 +813,11 @@ void ViewTodoList() {
 					switch (choice) {
 					case 1:
 						SubmitToAdmin(student);
+						DeleteTodoItem("代办事项教师端.txt", line);
 						break;
 					case 2:
-						RejectAppeal();
+						RejectAndRecordAppeal(student);
+						DeleteTodoItem("代办事项教师端.txt", line);
 						break;
 					default:
 						printf("无效选项，请重新选择。\n");
@@ -757,8 +833,18 @@ void ViewTodoList() {
 	fclose(file);
 }
 
-void RejectAppeal(){
+
+void RejectAndRecordAppeal(Stu* student) {
+	FILE *file = fopen("驳回申诉.txt", "a");
+	if (file == NULL) {
+		printf("无法打开文件。\n");
+		return;
+	}
 	
+	fprintf(file, "申请被驳回的学生：%s ID：%s\n", student->name, student->acc.idnumber);
+	printf("学生 %s 的申诉已被驳回并记录。\n", student->name);
+	
+	fclose(file);
 }
 
 void SubmitToAdmin(Stu* student){

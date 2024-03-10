@@ -93,5 +93,6 @@ void PasswordRecovery();//找回密码
 Stu* FindStudentInfo(const char* name, const char* id);
 void SubmitToAdmin(Stu* student);
 void ViewTodoList();
-void RejectAppeal();
+void RejectAndRecordAppeal(Stu* student);
 bool CheckStudentExistence(Stu* student);
+bool CheckRejectedAppeals(const char *studentName);
