@@ -19,7 +19,6 @@ typedef struct Student {
 	int rank[3];
 	int totalRank;
 	struct Student* next;
-	char email[100];
 } Stu;// 定义学生结构体
 
 
@@ -89,9 +88,10 @@ void ExportClassToFile(Classes* classPtr, const char* folderPath);//导出单个
 void AppendStudentsToFile(const Classes* classPtr, const char* filePath);//追加到学生文件中
 void UpdateTeacherClass(const char* filename, const char* teacherID, const char* className);//更新教师文件
 void ExportAllStudentsToFile(Classes* headList, const char* filename);//更新student.txt的内容
-void InitializeTodoList(const Stu *student);//申诉成绩
+void InitializeTodoList(Stu *student);//申诉成绩
 void PasswordRecovery();//找回密码
 Stu* FindStudentInfo(const char* name, const char* id);
 void SubmitToAdmin(Stu* student);
 void ViewTodoList();
 void RejectAppeal();
+bool CheckStudentExistence(Stu* student);

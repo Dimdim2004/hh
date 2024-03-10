@@ -262,20 +262,79 @@ void StudentMenu(Stu* student) {
 	} while (1);
 }
 
+bool CheckStudentExistence(Stu *student) {
+	FILE *file = fopen("代办事项教师端.txt", "r");
+	if (file == NULL) {
+		printf("无法打开文件。\n");
+		return false;
+	}
+	char line[MAX_LENGTH];
+	while (fgets(line, sizeof(line), file) != NULL) {
+		char name[MAX_LENGTH], idnumber[MAX_LENGTH], reason[256];
+		if (sscanf(line, "申请者：%s ID：%s %s", name, idnumber, reason) ) {
+			if (strcmp(name, student->name) == 0) {
+				fclose(file);
+				return true;
+			}
+		}
+	}
+	
+	fclose(file);
+	return false;
+}
 
-void InitializeTodoList(const Stu *student) {
+
+void InitializeTodoList(Stu *student) {
+	if (CheckStudentExistence(student)) {
+		printf("您的申诉正在审核中，请耐心等待。\n");
+		return;
+	}
 	FILE *file = fopen("代办事项教师端.txt", "a");
 	if (file == NULL) {
 		printf("无法打开文件。\n");
 		return;
 	}
 	
+	// 学生选择申诉的科目
+	printf("请选择要申诉的科目：\n");
+	printf("*****************************************************\n");
+	printf("*********************  1、语文      *****************\n");
+	printf("*********************  2、数学      *****************\n");
+	printf("*********************  3、英语      *****************\n");
+	printf("*********************  4、总分      *****************\n");
+	printf("*****************************************************\n");
+	int subjectChoice;
+	printf("请输入选项： ");
+	scanf("%d", &subjectChoice);
+	getchar(); // 消耗换行符
+	
+	char subject[20];
+	switch (subjectChoice) {
+	case 1:
+		strcpy(subject, "语文");
+		break;
+	case 2:
+		strcpy(subject, "数学");
+		break;
+	case 3:
+		strcpy(subject, "英语");
+		break;
+	case 4:
+		strcpy(subject, "总分");
+		break;
+	default:
+		printf("无效选项，请重新选择。\n");
+		fclose(file);
+		return;
+	}
+	
 	// 将所有信息放在一行中
-	fprintf(file, "申请者：%s ID：%s 申请原因：学生 %s 的成绩需更新。\n",
-		student->name, student->acc.idnumber,student->name);
+	fprintf(file, "申请者：%s ID：%s 申请原因：学生%s的%s成绩需更新。\n",
+		student->name, student->acc.idnumber, student->name, subject);
 	printf("已经将情况反馈！请耐心等候！");
 	fclose(file);
 }
+
 
 void PasswordRecovery(const char* studentFolder, const char* classFolder){
 	char studentID[MAX_LENGTH];
@@ -290,7 +349,7 @@ void PasswordRecovery(const char* studentFolder, const char* classFolder){
 	safeInput(studentName, sizeof(studentName));
 	
 	Stu* student = FindStudentInfo(studentName, studentID);
-	
+	strcpy(student->acc.password, "123456");
 	char studentFilePath[256];
 	snprintf(studentFilePath, sizeof(studentFilePath), "%s\\students.txt", studentFolder);
 	UpdateStudentInfoInFile(studentFilePath, student, 0);
@@ -312,9 +371,8 @@ Stu* FindStudentInfo(const char* name, const char* id) {
 		printf("无法打开文件 \n");
 		return NULL;
 	}
-	
 	Stu* student = NULL;
-	char buffer[MAX_LENGTH];
+	char buffer[256];
 	while (fgets(buffer, sizeof(buffer), fp) != NULL) {
 		char currentIdnumber[MAX_LENGTH], currentPassword[MAX_LENGTH];
 		char currentName[MAX_LENGTH], currentClassName[MAX_LENGTH];
@@ -329,8 +387,8 @@ Stu* FindStudentInfo(const char* name, const char* id) {
 					return NULL;
 				}
 				strcpy(student->name, currentName);
+				strcpy(student->acc.password,currentPassword);
 				strcpy(student->acc.idnumber,currentIdnumber);
-				strcpy(student->acc.password, "123456");
 				strcpy(student->className, currentClassName);
 				for (int i = 0; i < 3; ++i) {
 					student->grade[i] = grade[i];
@@ -654,11 +712,14 @@ void ViewTodoList() {
 	char line[500];
 	while (fgets(line, sizeof(line), file) != NULL) {
 		printf("-----------------------------------------------------------\n");
-		printf("%s",line);
+		printf("%s", line);
 		printf("-----------------------------------------------------------\n");
-		char name[MAX_LENGTH], idnumber[MAX_LENGTH], reason[128];
-		if (sscanf(line, "申请者：%s ID：%s 申请原因：%[^\n]", name, idnumber, reason)) {
-			printf("%s %s %s",name,idnumber,reason);
+		char name[MAX_LENGTH], idnumber[MAX_LENGTH], reason[256];
+		if (sscanf(line, "申请者：%s ID：%s %s", name, idnumber, reason)==3) {
+			// 申请者姓名为name，ID为idnumber，申请原因为reason
+			printf("申请者姓名：%s\n", name);
+			printf("申请者ID：%s\n", idnumber);
+			printf("%s\n", reason);
 			Stu *student = FindStudentInfo(name, idnumber);
 
 			if (student != NULL) {
@@ -839,7 +900,6 @@ void ModifyStudentInfoInClass(Classes* classPtr, const char* classFolder, const 
 	printf("学生信息已成功修改！\n");
 	Sleep(2500); 
 }
-
 
 void DisplayStudentImformationMenu(Tea* teacher) {
 	Classes* current = FindClassByName(headList, teacher->className);
@@ -1144,7 +1204,6 @@ void AdminMenu(Admin* admin) {
 	} while (1);
 }
 
-
 void DeleteStudentImformationMenu(Admin* admin) {
 	
 	int choice;
@@ -1225,7 +1284,6 @@ void AskSaveToFileAboutDelete(const char* classFolder, const char* studentFolder
 	} while (!isValidInput); // 当用户输入无效时继续循环询问
 }
 
-
 void DeleteStudentInfoAndUpdateFile(const char* filename, Stu* student,int isClassFile) {
 	FILE* file = fopen(filename, "r");
 	if (file == NULL) {
@@ -1278,7 +1336,6 @@ void DeleteStudentInfoAndUpdateFile(const char* filename, Stu* student,int isCla
 		exit(EXIT_FAILURE);
 	}
 }
-
 
 void SaveStudentInfoToFile(const Classes* classList, const char* folderPath) {
 	const Classes* currentClass = classList;
@@ -1387,7 +1444,6 @@ Stu* FindStudentInClass(Classes* classPtr, const char* key) {
 	printf("没有找到对应的学生\n");
 	return NULL;
 }
-
 
 void DisplayClassInformation(const Classes* classPtr) {
 	system("cls");
@@ -1812,7 +1868,6 @@ void ExportAllStudentsToFile(Classes* headList, const char* filename) {
 
 //C:\Users\bb\Desktop\2023届学生管理系统\数据\class1的副本.txt
 
-// 导出班级信息到文件
 void ExportClassToFile(Classes* classPtr, const char* folderPath) {
 	char filename[256];
 	snprintf(filename, sizeof(filename), "%s\\%s.txt", folderPath, classPtr->className);
@@ -1967,6 +2022,7 @@ void ClearClassInfo(Classes* classPtr) {
 	
 	printf("班级 %s 内容已成功清空！\n", classPtr->className);
 }
+
 
 
 
