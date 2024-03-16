@@ -779,6 +779,7 @@ void DeleteTodoItem(const char *filename, const char *lineToDelete) {
 		return;
 	}
 	
+
 	printf("删除并重命名操作成功。\n");
 }
 
@@ -820,11 +821,11 @@ void ViewTodoList() {
 					switch (choice) {
 					case 1:
 						SubmitToAdmin(student, line);
-						DeleteTodoItem("代办事项教师端.txt", line);
+						DeleteTodoItem("C:\\Users\\bb\\Desktop\\2023届学生管理系统\\系统项目\\Project1\\代办事项管理员端.txt", line);
 						break;
 					case 2:
 						RejectAndRecordAppeal(student);
-						DeleteTodoItem("代办事项教师端.txt", line);
+						DeleteTodoItem("C:\\Users\\bb\\Desktop\\2023届学生管理系统\\系统项目\\Project1\\代办事项管理员端.txt", line);
 						break;
 					default:
 						printf("无效选项，请重新选择。\n");
@@ -1359,7 +1360,7 @@ void ModifyStudentInfo(Stu* student, const char* classFolder, const char* studen
 
 
 void ViewTodoListAdmin() {
-	FILE *file = fopen("代办事项管理员端.txt", "r");
+	FILE *file = fopen("待办事项管理员端.txt", "r");
 	if (file == NULL) {
 		printf("无法打开文件。\n");
 		return;
@@ -1381,7 +1382,6 @@ void ViewTodoListAdmin() {
 			if (student != NULL) {
 				printf("班级：%s\n", student->className);
 				printf("语文成绩：%d 数学成绩：%d 英语成绩：%d\n\n", student->grade[0],student->grade[1],student->grade[2]);
-				Classes* current = FindClassByName(headList,student->className);
 				// 打印菜单供管理员选择
 				int choice;
 				do {
@@ -1394,12 +1394,12 @@ void ViewTodoListAdmin() {
 					
 					switch (choice) {
 					case 1:
-						ModifyStudentInfo(current, "C:\\Users\\bb\\Desktop\\2023届学生管理系统\\系统项目\\学生信息", "C:\\Users\\bb\\Desktop\\2023届学生管理系统\\系统项目");
-						DeleteTodoItem("代办事项管理员端.txt", line);
+						ModifyStudentInfo(student, "C:\\Users\\bb\\Desktop\\2023届学生管理系统\\系统项目\\学生信息", "C:\\Users\\bb\\Desktop\\2023届学生管理系统\\系统项目");
+						DeleteTodoItem("C:\\Users\\bb\\Desktop\\2023届学生管理系统\\系统项目\\Project1\\代办事项管理员端.txt", line);
 						break;
 					case 2:
 						RejectAndRecordAppeal(student);
-						DeleteTodoItem("代办事项管理员端.txt", line);
+						DeleteTodoItem("C:\\Users\\bb\\Desktop\\2023届学生管理系统\\系统项目\\Project1\\代办事项管理员端.txt", line);
 						break;
 					default:
 						printf("无效选项，请重新选择。\n");
